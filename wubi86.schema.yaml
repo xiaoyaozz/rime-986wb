@@ -2,13 +2,13 @@
 # encoding: utf-8
 
 schema:
-  schema_id: wubi86
-  name: "五笔86"
-  version: "0.21"
+  schema_id: wubi986
+  name: "五笔986"
+  version: "19055"
   author:
     - 發明人 王永民先生
   description: |
-    五筆字型86版
+    五筆字型986版
     碼表源自 ibus-table
     敲 z 鍵進入拼音反查
   dependencies:
@@ -51,7 +51,7 @@ speller:
   #max_code_length: 4
 
 translator:
-  dictionary: wubi86
+  dictionary: wubi986
   enable_charset_filter: true
   enable_sentence: true
   enable_encoder: true
