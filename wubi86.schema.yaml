@@ -1,19 +1,16 @@
 # Rime schema settings
 # encoding: utf-8
-
 schema:
   schema_id: wubi986
-  name: "五笔986"
-  version: "19055"
+  name: "wubi986"
+  version: "19.055"
   author:
-    - 發明人 王永民先生
+    吟枫舞墨
   description: |
-    五筆字型986版
-    碼表源自 ibus-table
-    敲 z 鍵進入拼音反查
+    五笔986版
   dependencies:
-    - pinyin_simp
-
+#    - pinyin_simp
+    - terra_pinyin
 switches:
   - name: ascii_mode
     reset: 0
@@ -21,10 +18,9 @@ switches:
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: extended_charset
-    states: [ 常用, 增廣 ]
+    states: [ 常用, 扩展 ]
   - name: ascii_punct
     states: [ 。，, ．， ]
-
 engine:
   processors:
     - ascii_composer
@@ -45,39 +41,60 @@ engine:
     - punct_translator
     - reverse_lookup_translator
     - table_translator
-
+    - history_translator@history  #z键重复输入
+  filters:
+    - reverse_lookup_filter@look_up_pinyin  # 查拼音
 speller:
-  delimiter: " ;'"
-  #max_code_length: 4
-
+  alphabet: "abcdefghijklmnopqrstuvwxyz"                  #定义本方案输入键
+  delimiter: " "           
+  max_code_length: 4 # 最长4码
+  auto_select: true # 顶字上屏
 translator:
-  dictionary: wubi986
+  dictionary: wubi986                # 翻译器将调取此字典文件
+  initial_quality: 100
   enable_charset_filter: true
-  enable_sentence: true
-  enable_encoder: true
-  encode_commit_history: true
-  max_phrase_length: 4
+  enable_sentence: false
+  enable_encoder: false
+  encode_commit_history: false
+  max_phrase_length: 2
+  enable_completion: true
+  enable_user_dict: false
+  db_class: tabledb
   disable_user_dict_for_patterns:
     - "^z.*$"
-
+  comment_format:
+    - xform|~||
+abc_segmentor:
+  extra_tags:
 reverse_lookup:
-  dictionary: pinyin_simp
-  prefix: "z"
-  suffix: "'"
-  tips: 〔拼音〕
+  dictionary: terra_pinyin
+  prefix: "`"
+#  suffix: "'"
+  tips: 【拼音】
   preedit_format:
-    - xform/([nl])v/$1ü/
-    - xform/([nl])ue/$1üe/
-    - xform/([jqxy])v/$1u/
-
+    __include: terra_pinyin.schema:/translator/preedit_format
+  comment_format:
+    __include: translator/comment_format
+look_up_pinyin:
+  tags: [ look_up_pinyin ]
+  dictionary: terra_pinyin
+  overwrite_comment: true
+  comment_format:
+    __include: terra_pinyin.schema:/translator/comment_format
 punctuator:
   import_preset: symbols
-
 key_binder:
   import_preset: default
-
+  bindings:
+    - {accept: semicolon, send: 2, when: has_menu}      #分號次選
+    - {accept: apostrophe, send: 3, when: has_menu}     #撇號三選
 recognizer:
   import_preset: default
   patterns:
-    punct: '^/([0-9]0?|[A-Za-z]+)$'
-    reverse_lookup: "^z[a-z]*'?$"
+    punct: "^/([0-9]+[a-z]*|[a-z]+)$|^tab$|^zjh$"
+    reverse_lookup: "`[a-z|a-z12345;,/\\\\]*'?$"
+    look_up_pinyin: "[a-y]+`$"
+history:  #z键重复输入
+  input: z
+  size: 1
+  initial_quality: 1
